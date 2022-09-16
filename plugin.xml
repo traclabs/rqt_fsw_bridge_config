@@ -1,0 +1,17 @@
+<library path="src">
+  <class name="BridgeConfigPlugin" type="rqt_fsw_bridge_config.bridge_config.BridgeConfig" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A Python GUI plugin to view and edit FSW-ROS2 Bridge Configuration Files.
+    </description>
+    <qtgui>
+      <group>
+        <label>FSW Bridge</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to FSW bridge.</statustip>
+      </group>
+      <label>FSW Bridge Config</label>
+      <icon type="theme">system-search</icon>
+      <statustip>A Python GUI plugin to view and edit FSW bridge configuration files.</statustip>
+    </qtgui>
+  </class>
+</library>
