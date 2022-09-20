@@ -110,9 +110,6 @@ class BridgeConfigWidget(QWidget):
 
     def send_parameters_set_request(self):
         req = SetParameters.Request()
-        self._node.get_logger().info('config dict: '
-                                     + str(self._config_dict[self._plugin_node_name]
-                                                            ["ros__parameters"]))
         flat_dict = self.flatten(self._config_dict[self._plugin_node_name]["ros__parameters"])
         self._node.get_logger().info('flat_dict: ' + str(flat_dict))
         for key, val in flat_dict.items():
@@ -221,7 +218,6 @@ class BridgeConfigWidget(QWidget):
             return
         self.config_tree_widget.clear()
         self.build_config_tree(self.config_tree_widget.invisibleRootItem(), self._config_dict)
-        self._node.get_logger().info("updated dict: " + str(self._config_dict))
 
     def parse_config_files(self, config_files):
         self.config_file_combo_box.clear()
@@ -229,7 +225,6 @@ class BridgeConfigWidget(QWidget):
             bn = ntpath.basename(f)
             self._config_file_map[bn] = f
             self.config_file_combo_box.addItem(bn)
-        self._node.get_logger().info('config file map: -- ' + str(self._config_file_map))
 
     def roll_out_tree_as_list(self, it, tl):
         tl.append(it.text(0))
