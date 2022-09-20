@@ -25,7 +25,8 @@ setup(
         'Topic :: Software Development',
     ],
     description=(
-        'rqt_fsw_bridge_config provides a GUI plugin for displaying information about the FSW ROS2 bridge configuration files'
+        'rqt_fsw_bridge_config provides a GUI plugin for displaying information '
+        + 'about the FSW ROS2 bridge configuration files'
     ),
     license='BSD',
     tests_require=['pytest'],

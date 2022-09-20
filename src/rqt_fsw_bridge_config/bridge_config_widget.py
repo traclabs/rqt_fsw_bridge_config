@@ -2,21 +2,20 @@
 
 from __future__ import division
 import os
-import ast
 import ntpath
 import yaml
 import collections
 
 from python_qt_binding import loadUi
 from python_qt_binding.QtCore import QTimer, Slot, Qt
-from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem, QTableWidgetItem, QComboBox
+from python_qt_binding.QtWidgets import QWidget, QTreeWidgetItem
 from PyQt5 import QtCore, QtWidgets
 
 import rclpy
 from ament_index_python import get_resource
 from rcl_interfaces.srv import SetParameters, SetParametersAtomically
 from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
-from fsw_ros2_bridge_msgs.srv import GetMessageInfo, SetMessageInfo, GetPluginInfo
+from fsw_ros2_bridge_msgs.srv import GetPluginInfo
 
 from .config_info import ConfigInfo
 from .confirm_dialog import ConfirmDialog
@@ -31,7 +30,8 @@ class BridgeConfigWidget(QWidget):
 
         self._node = node
         self._plugin = plugin
-        self._logger = self._node.get_logger().get_child('rqt_fsw_bridge_config.BridgeConfigWidget')
+        self._logger = self._node.get_logger().\
+            get_child('rqt_fsw_bridge_config.BridgeConfigWidget')
         self._connected_to_bridge = False
         self._plugin_pkg_name = ""
         self._plugin_name = ""
@@ -110,7 +110,9 @@ class BridgeConfigWidget(QWidget):
 
     def send_parameters_set_request(self):
         req = SetParameters.Request()
-        self._node.get_logger().info('config dict: ' + str(self._config_dict[self._plugin_node_name]["ros__parameters"]))
+        self._node.get_logger().info('config dict: '
+                                     + str(self._config_dict[self._plugin_node_name]
+                                                            ["ros__parameters"]))
         flat_dict = self.flatten(self._config_dict[self._plugin_node_name]["ros__parameters"])
         self._node.get_logger().info('flat_dict: ' + str(flat_dict))
         for key, val in flat_dict.items():
@@ -121,7 +123,6 @@ class BridgeConfigWidget(QWidget):
         future = self.plugin_params_client.call_async(req)
         rclpy.spin_until_future_complete(self._node, future)
         return future.result()
-
 
     def parse_param_val(self, value):
         pval = ParameterValue()
@@ -220,7 +221,7 @@ class BridgeConfigWidget(QWidget):
             return
         self.config_tree_widget.clear()
         self.build_config_tree(self.config_tree_widget.invisibleRootItem(), self._config_dict)
-        self._node.get_logger().info("updated dict: " + str(self._config_dict   ))
+        self._node.get_logger().info("updated dict: " + str(self._config_dict))
 
     def parse_config_files(self, config_files):
         self.config_file_combo_box.clear()
@@ -233,7 +234,8 @@ class BridgeConfigWidget(QWidget):
     def roll_out_tree_as_list(self, it, tl):
         tl.append(it.text(0))
         if it.parent():
-            pit = self.roll_out_tree_as_list(it.parent(), tl) 
+            pit = self.roll_out_tree_as_list(it.parent(), tl)
+            return pit
 
     def set_config_data(self, tl, val):
         if not tl:
@@ -304,29 +306,34 @@ class BridgeConfigWidget(QWidget):
 
     @QtCore.pyqtSlot()
     def save_config_pressed(self):
-        config_file = self.config_file_combo_box.currentText()
-        fname = self._config_file_map[config_file]
-        self._node.get_logger().info('saving to: ' + fname)
-        try:
-            with open(fname, "w") as outfile:
-                r = yaml.dump(self._config_dict, outfile, default_flow_style=False)
-        except FileNotFoundError:
-            pass
+        dialog_str = "Really save parameters?"
+        dlg = ConfirmDialog(dialog_str, self)
+        if dlg.exec():
+            config_file = self.config_file_combo_box.currentText()
+            fname = self._config_file_map[config_file]
+            self._node.get_logger().info('saving to: ' + fname)
+            try:
+                with open(fname, "w") as outfile:
+                    yaml.dump(self._config_dict, outfile, default_flow_style=False)
+            except FileNotFoundError:
+                pass
 
     @QtCore.pyqtSlot()
     def reload_config_pressed(self):
-        self.parse_config_file(str(self.config_file_combo_box.currentText()))
+        dialog_str = "Really reload parameters from disk?"
+        dlg = ConfirmDialog(dialog_str, self)
+        if dlg.exec():
+            self.parse_config_file(str(self.config_file_combo_box.currentText()))
 
     @QtCore.pyqtSlot()
     def send_config_pressed(self):
-        self.send_parameters_set_request()
+        dialog_str = "Really send parameters to node?"
+        dlg = ConfirmDialog(dialog_str, self)
+        if dlg.exec():
+            self.send_parameters_set_request()
 
     @QtCore.pyqtSlot(int)
     def update_checkbox_changed(self, s):
         if s == 2:
             self._node.get_logger().info("Hey! we're sending everything when you check this!")
             self.send_parameters_set_request()
-        
-
-
-
